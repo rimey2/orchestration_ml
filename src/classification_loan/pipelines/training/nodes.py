@@ -82,7 +82,7 @@ def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series,log_to_mlflow:
     y_proba = model.predict_proba(X_test)[:, 1]
     report = classification_report(y_test, y_pred, output_dict=True)
     roc_auc_value = roc_auc_score(y_test, y_proba)
-    print(f"AUC: {auc:.4f}")
+    print(f"AUC: {roc_auc_value:.4f}")
 
     if log_to_mlflow:
         
