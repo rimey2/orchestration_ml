@@ -4,6 +4,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score, classification_report
 import mlflow
 import mlflow.sklearn
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_curve, auc
+import os
 
 
 import pickle
@@ -58,12 +61,14 @@ def train_model(
     if log_to_mlflow:
         mlflow.set_tracking_uri('http://127.0.0.1:5000')
 
-        run = mlflow.start_run(experiment_id=experiment_id)
+        run = mlflow.start_run(experiment_id=experiment_id,nested = True)
+        run_id = run.info.run_id
         # Log hyperparams et score
         mlflow.log_params(best_params)
         mlflow.log_metric("roc_auc_cv", best_score)
-
+        print("log_metric")
         # Log du modèle
+       ## mlflow.log_artifact(artifact_path="")
         mlflow.sklearn.log_model(best_model, "model")
 
         mlflow.end_run()
@@ -72,12 +77,30 @@ def train_model(
 
 
 # 3. Prédictions & évaluation
-def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series):
+def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series,log_to_mlflow: bool = False):
     y_pred = model.predict(X_test)
     y_proba = model.predict_proba(X_test)[:, 1]
     report = classification_report(y_test, y_pred, output_dict=True)
-    auc = roc_auc_score(y_test, y_proba)
+    roc_auc_value = roc_auc_score(y_test, y_proba)
     print(f"AUC: {auc:.4f}")
+
+    if log_to_mlflow:
+        
+        fpr, tpr, _ = roc_curve(y_test, y_proba)
+        roc_auc = auc(fpr, tpr)
+        plt.figure()
+        plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (AUC = {roc_auc:.2f})')
+        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('We will see if he gets that loan')
+        plt.legend(loc="lower right")
+        
+        roc_path = "roc_curve.png"
+        plt.savefig(roc_path)
+        plt.close()
+
+        mlflow.log_artifact(roc_path)
     return report
 
 # 4. Sauvegarde du modèle (si besoin)

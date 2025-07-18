@@ -1,6 +1,6 @@
 test_ratio: 0.25
-automl_max_evals: 10
+automl_max_evals: 1
 
 log_to_mlflow: True # Do we log metrics and artifacts to MLflow ?
 experiment_id: 0 # Experimented ID associated to this project
-mlflow_model_registry: "loan-classification"
+mlflow_model_registry: "loan_classification"

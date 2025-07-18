@@ -22,7 +22,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 
         node(
             func=evaluate_model,
-            inputs=["model", "X_test", "y_test"],
+            inputs=["model", "X_test", "y_test", "params:log_to_mlflow"],
             outputs="evaluation_report",
             name="evaluate_model_node",
         ),
