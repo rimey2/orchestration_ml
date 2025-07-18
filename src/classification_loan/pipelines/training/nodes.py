@@ -7,7 +7,7 @@ import mlflow.sklearn
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 import os
-
+from sklearn.metrics import accuracy_score
 
 import pickle
 
@@ -53,8 +53,11 @@ def train_model(
     best_params = grid_search.best_params_
     best_score = grid_search.best_score_
 
+    train_preds = best_model.predict(X_train)
+    train_accuracy = accuracy_score(y_train, train_preds)
     print("Best params:", best_params)
     print("Best AUC CV:", best_score)
+    print(f"Train Accuracy: {train_accuracy:.4f}")
 
     
     run_id = ""
@@ -66,6 +69,7 @@ def train_model(
         # Log hyperparams et score
         mlflow.log_params(best_params)
         mlflow.log_metric("roc_auc_cv", best_score)
+        mlflow.log_metric("train_accuracy", train_accuracy)
         print("log_metric")
         # Log du modèle
        ## mlflow.log_artifact(artifact_path="")
