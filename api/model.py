@@ -1,39 +1,20 @@
 import os
-import mlflow
-import joblib
 import pandas as pd
-
-from mlflow.tracking import MlflowClient
-
-# Config depuis .env
-mlflow.set_tracking_uri(os.getenv("MLFLOW_SERVER"))
+import joblib
 
 class Model:
     def __init__(self):
         self.model = None
-        self.transform_pipeline = None
-
         try:
             self.load_model()
         except Exception as e:
-            print(f"❌ ERREUR LORS DU CHARGEMENT COMPLET DU MODELE/PREPROCESS : {e}")
+            print(f"❌ Erreur lors du chargement du modèle : {e}")
 
     def load_model(self):
-        print("🔄 Tentative de chargement du modèle MLflow...")
-        try:
-            self.model = mlflow.sklearn.load_model(
-                f"models:/{os.getenv('MLFLOW_REGISTRY_NAME')}@{os.getenv('ENV')}"
-            )
-            print("✅ Modèle MLflow chargé.")
-        except Exception as e:
-            print(f"❌ ERREUR MLflow : {e}")
-            raise
+        model_path = "data/06_models/final_model.pkl"
+        print(f"🔄 Chargement du modèle local : {model_path}")
+        self.model = joblib.load(model_path)
+        print("✅ Modèle chargé avec succès.")
 
-        print("🔄 Tentative de chargement du pipeline...")
-        try:
-            self.transform_pipeline = joblib.load("data/04_feature/transform_pipeline.pkl")
-            print("✅ Pipeline chargé.")
-        except Exception as e:
-            print(f"❌ ERREUR Pipeline : {e}")
-            raise
-
+    def predict(self, df: pd.DataFrame):
+        return self.model.predict(df)
